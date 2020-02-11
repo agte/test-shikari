@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <title>Скрипты и стили</title>
+  <meta charset='utf8'>
+</head>
+<body>
+  <form id='form' style='padding: 1em'>
+    <fieldset>
+      <legend>Запрос</legend>
+      <label>
+        Ссылка на сайт
+        <input id='pageUrl' name='pageUrl' type='url' required />
+      </label>
+      <button id='send' type='submit'>Отправить</button>
+    </fieldset>
+    <fieldset style='margin-top: 1em'>
+      <legend>Ответ</legend>
+      <span id='loading' hidden>Loading...</span>
+      <output id='error' style='display: block; color: red'></output>
+      <textarea id='result' cols='80' rows='20' readonly></textarea>
+    </fieldset>
+  </form>
+
+  <script>
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      error.value = '';
+      result.value = '';
+      loading.hidden = false;
+
+      try {
+        const response = await fetch('/parse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pageUrl: pageUrl.value }),
+        });
+        loading.hidden = true;
+
+        const jsonResponse = await response.json();
+        if (response.status !== 200) {
+          error.value = jsonResponse.message;
+        } else {
+          result.value = jsonResponse.length ? jsonResponse.join('\n') : 'Пусто';
+        }
+      } catch (e) {
+        alert(`Проблемы с сетью: ${e.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
